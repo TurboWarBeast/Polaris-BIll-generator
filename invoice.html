@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polaris Invoice</title>
+<style>
+  body { font-family: 'Times New Roman', serif; margin: 0; padding: 0; background: white; }
+  #page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 18mm 15mm 20mm 15mm; position: relative; box-sizing: border-box; }
+  .red-bold { color: #c00000; font-weight: bold; font-size: 20pt; margin: 0; }
+  .company-info { font-size: 10.5pt; line-height: 1.45; margin: 8px 0 0 0; }
+  .right-box {
+    position: absolute; top: 18mm; right: 15mm; width: 365px;
+    border: 2px solid black; padding: 10px 12px; font-size: 11pt;
+  }
+  .box-title { font-size: 15pt; font-weight: bold; text-align: center; margin-bottom: 8px; }
+  .box-row { display: flex; margin: 6px 0; }
+  .box-label { font-weight: bold; width: 148px; flex-shrink: 0; }
+  .box-value { flex-grow: 1; border-bottom: 1px solid #000; padding-left: 5px; min-height: 18px; }
+  .box-value input { width: 100%; border: none; background: transparent; font: inherit; padding: 0; margin: 0; }
+  .box-value textarea { width: 100%; border: none; background: transparent; font: inherit; padding: 0; margin: 0; resize: none; min-height: 64px; font-size:11pt; }
+  .clear { clear: both; }
+  .delete-btn { color: red; cursor: pointer; font-size: 20px; font-weight: bold; }
+  
+  /* YE SABSE ZAROORI LINE — PRINT MEIN HEADER/FOOTER HATA DEGA */
+  @media print {
+    @page { margin: 0; }
+    body { margin: 0; padding: 0; }
+    #page { margin: 0; padding: 18mm 15mm 20mm 15mm; box-shadow: none; }
+    #buttons, .delete-btn { display: none !important; }
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div id="page">
+  <!-- Left Company Details -->
+  <div style="float:left; width:48%;">
+    <div class="red-bold">POLARIS</div>
+    <div class="company-info">
+      32A, GARCHA FIRST LANE<br>
+      Kolkata - 700 019, W.B., INDIA<br>
+      Phone : +9133 24617133<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+9162918-54550<br><br>
+      Email : archpole@gmail.com<br>
+      Web   : www.polaris-architect.com<br>
+      <b>GSTIN : 19AAGFP2614P1ZT</b>
+    </div>
+  </div>
+
+  <!-- Right TAX-INVOICE Box -->
+  <div class="right-box">
+    <div class="box-title">TAX - INVOICE</div>
+    <div class="box-row"><div class="box-label">INVOICE NUMBER :</div><div class="box-value"><input type="text" value="A/18/2025-2026" id="invNo"></div></div>
+    <div class="box-row"><div class="box-label">INVOICE DATE :</div><div class="box-value"><input type="date" value="2025-11-04" id="invDate"></div></div>
+    <div class="box-row"><div class="box-label">ORDER REF. NUMBER :</div><div class="box-value"><input type="text" id="orderRef"></div></div>
+    <div class="box-row"><div class="box-label">ORDER DATE :</div><div class="box-value"><input type="date" id="orderDate"></div></div>
+    <div class="box-row"><div class="box-label">PROJECT NAME :</div><div class="box-value"><textarea rows="3" id="projectName"></textarea></div></div>
+  </div>
+
+  <div class="clear"></div>
+  <br><br>
+
+  <b>INVOICE TO:</b><br>
+  <textarea rows="5" id="clientAddress" style="width:100%; border:1px solid black; padding:8px; font-size:10.5pt; resize:none;">
+
+</textarea>
+
+  <br><br>
+
+  <!-- Main Table -->
+  <table border="1" cellpadding="6" cellspacing="0" style="width:100%; font-size:10.5pt; border-collapse:collapse;">
+    <thead>
+      <tr style="font-weight:bold; text-align:center;">
+        <td width="5%">SL.<br>NO.</td>
+        <td width="40%">DESCRIPTION</td>
+        <td width="8%">SAC<br>CODE</td>
+        <td width="10%">FEE<br>AMOUNT</td>
+        <td colspan="2" width="12%">% OF THIS BILL</td>
+        <td width="10%">UPTO LAST<br>BILL CLAIMED<br>AMOUNT</td>
+        <td width="10%">CUMULATIVE<br>AMOUNT</td>
+        <td width="10%">THIS BILL<br>AMOUNT</td>
+        <td width="5%"></td>
+      </tr>
+      <tr style="font-weight:bold; font-size:9pt; text-align:center;">
+        <td colspan="4"></td>
+        <td>UPTO LAST<br>BILL</td>
+        <td>THIS<br>BILL</td>
+        <td colspan="4"></td>
+      </tr>
+    </thead>
+    <tbody id="items">
+      <tr>
+        <td align="center" class="slno">1</td>
+        <td style="padding:8px;"><textarea rows="10" style="width:100%; height:160px; resize:none; border:none; font:inherit;">
+</textarea></td>
+        <td align="center"><input type="text" value="9983" style="width:70px"></td>
+        <td align="right"><input type="number" value="2000000" class="fee" style="width:100px"></td>
+        <td align="right"><input type="number" value="0" style="width:70px"></td>
+        <td align="right"><input type="number" value="100" style="width:70px"></td>
+        <td align="right" class="calc">0.00</td>
+        <td align="right" class="calc">0.00</td>
+        <td align="right" class="calc">0.00</td>
+        <td align="center"><span class="delete-btn" onclick="deleteRow(this)">×</span></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr style="font-weight:bold;">
+        <td colspan="8" align="right" style="padding:10px;">TOTAL</td>
+        <td align="right" id="total" style="padding:10px;">0.00</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <br>
+  <div style="font-size:10.5pt;">
+    <b>NET INVOICE AMOUNT</b><br>
+    Total Invoice Amount (in words): <span id="words">Rupees Zero Only</span>
+  </div>
+
+  <div style="float:right; margin-top:-30px;">
+    <table border="1" cellpadding="6" style="font-size:10pt;">
+      <tr align="center"><td>Taxable Value</td><td>SGST</td><td>CGST</td></tr>
+      <tr align="right"><td>0.00</td><td>0.00</td><td>0.00</td></tr>
+    </table>
+  </div>
+  <div class="clear"></div><br><br>
+
+  <div style="font-size:10pt;">
+    <b>BANK DETAILS:</b> HDFC BANK, Branch Code: 0516, Navjivan 1st Floor, Hazra Road Kolkata - 700 026<br>
+    ACCOUNT NO.: 05168020000151      IFSC: HDFC0000516<br><br>
+    COMPANY PAN NO : AAGFP2614P
+  </div>
+
+  <div style="margin-top:30px; display:flex; justify-content:space-between; font-size:11pt;">
+    <div>Signature of receiving authority</div>
+    <div style="text-align:right;">for POLARIS<br><br><br><br><b>Authorized Signatory</b></div>
+  </div>
+</div>
+
+<!-- Buttons -->
+<div id="buttons" style="text-align:center; padding:30px; background:#f0f0f0; position:fixed; bottom:0; width:100%; left:0;">
+  <button onclick="addRow()" style="padding:15px 40px; background:#c00000; color:white; border:none; font-size:18pt; border-radius:8px; cursor:pointer;">+ Add Row</button>
+  <button onclick="window.print()" style="padding:15px 40px; background:#0066cc; color:white; margin-left:20px; font-size:18pt; border-radius:8px; cursor:pointer;">Print / Save PDF</button>
+  <button onclick="downloadPDF()" style="padding:15px 40px; background:#00aa00; color:white; margin-left:20px; font-size:18pt; border-radius:8px; cursor:pointer;">Download PDF</button>
+</div>
+
+<script>
+function updateCalc() {
+  let total = 0;
+  document.querySelectorAll('#items tr').forEach((row, i) => {
+    row.querySelector('.slno').textContent = i + 1;
+    let amt = parseFloat(row.querySelector('.fee').value) || 0;
+    total += amt;
+    row.querySelectorAll('.calc')[2].textContent = amt.toLocaleString('en-IN', {minimumFractionDigits:2});
+  });
+  document.getElementById('total').textContent = total.toLocaleString('en-IN', {minimumFractionDigits:2});
+  document.getElementById('words').textContent = numberToWords(total) + " Only";
+}
+
+function addRow() {
+  const tbody = document.getElementById('items');
+  const tr = tbody.insertRow();
+  tr.innerHTML = `
+    <td align="center" class="slno">${tbody.rows.length}</td>
+    <td style="padding:8px;"><textarea rows="6" style="width:100%; resize:none; border:none; font:inherit;"></textarea></td>
+    <td align="center"><input type="text" value="9983" style="width:70px"></td>
+    <td align="right"><input type="number" class="fee" value="0" style="width:100px"></td>
+    <td align="right"><input type="number" value="0" style="width:70px"></td>
+    <td align="right"><input type="number" value="0" style="width:70px"></td>
+    <td align="right" class="calc">0.00</td>
+    <td align="right" class="calc">0.00</td>
+    <td align="right" class="calc">0.00</td>
+    <td align="center"><span class="delete-btn" onclick="deleteRow(this)">X</span></td>
+  `;
+  tr.querySelector('.fee').addEventListener('input', updateCalc);
+  updateCalc();
+}
+
+function deleteRow(btn) { btn.closest('tr').remove(); updateCalc(); }
+
+document.querySelectorAll('.fee').forEach(e => e.addEventListener('input', updateCalc));
+updateCalc();
+
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const canvas = await html2canvas(document.getElementById('page'), {scale: 3, useCORS: true, logging: false});
+  const img = canvas.toDataURL('image/png');
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  pdf.addImage(img, 'PNG', 0, 0, 210, 297);
+  pdf.save(`Invoice_${document.getElementById('invNo').value || 'Polaris'}.pdf`);
+}
+
+function numberToWords(num) {
+  const a = ["","One ","Two ","Three ","Four ","Five ","Six ","Seven ","Eight ","Nine ","Ten ","Eleven ","Twelve ","Thirteen ","Fourteen ","Fifteen ","Sixteen ","Seventeen ","Eighteen ","Nineteen "];
+  const b = ["","","Twenty ","Thirty ","Forty ","Fifty ","Sixty ","Seventy ","Eighty ","Ninety "];
+  if (num == 0) return "Zero";
+  let crore = Math.floor(num / 10000000);
+  let lakh = Math.floor((num % 10000000) / 100000);
+  let thousand = Math.floor((num % 100000) / 1000);
+  let hundred = Math.floor((num % 1000) / 100);
+  let below = num % 100;
+  let words = "";
+  if (crore) words += numberToWords(crore) + "Crore ";
+  if (lakh) words += numberToWords(lakh) + "Lakh ";
+  if (thousand) words += numberToWords(thousand) + "Thousand ";
+  if (hundred) words += a[hundred] + "Hundred ";
+  if (below) words += (words && below < 100 ? "and " : "") + (below < 20 ? a[below] : b[Math.floor(below/10)] + (below%10 ? " " + a[below%10] : ""));
+  return words.trim();
+}
+</script>
+
+</body>
+</html>
